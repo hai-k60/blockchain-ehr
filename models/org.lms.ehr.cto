@@ -22,7 +22,9 @@ participant Patient identified by patientId {
   o String patientId
   o String firstName
   o String lastName
+  o String email
   o String dob
+  o String phoneNumber
   o String address
 }
 
@@ -31,6 +33,7 @@ participant Doctor identified by doctorId {
   o String doctorId
   o String firstName
   o String lastName
+  o String email
   o String Specialisation
   o String address
 }
@@ -38,6 +41,7 @@ participant Doctor identified by doctorId {
 participant Lab identified by labId {
   o String labId
   o String name
+  o String email
   o String address
 }
 

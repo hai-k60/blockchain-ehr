@@ -3,26 +3,26 @@ module.exports = {
   /*
   * Validata member registration fields ensuring the fields meet the criteria
   * @param {String} cardId
-  * @param {String} accountNumber
+  * @param {String} PatientId
   * @param {String} firstName
   * @param {String} lastName
   * @param {String} phoneNumber
   * @param {String} email
   */
-  validateMemberRegistration: async function(cardId, accountNumber, firstName, lastName, email, phoneNumber) {
+  validatePatientRegistration: async function(cardId, PatientId, firstName, lastName, email, phoneNumber, adress , dob) {
 
     var response = {};
 
     //verify input otherwise return error with an informative message
-    if (accountNumber.length < 6) {
+    if (PatientId.length < 6) {
       response.error = "Account number must be at least six digits long";
       console.log(response.error);
       return response;
-    } else if (!isInt(accountNumber)) {
+    } else if (!isInt(PatientId)) {
       response.error = "Account number must be all numbers";
       console.log(response.error);
       return response;
-    } else if (accountNumber.length > 25) {
+    } else if (PatientId.length > 25) {
       response.error = "Account number must be less than 25 digits";
       console.log(response.error);
       return response;

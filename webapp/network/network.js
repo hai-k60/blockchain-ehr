@@ -73,7 +73,7 @@ module.exports = {
   * @param {String} phoneNumber patient phone number
   * @param {String} dob patient dob
   */
- registerPatient: async function (cardId, patientID,firstName, lastName, dob, address) {
+ registerPatient: async function (cardId, patientID,firstName, lastName, email , phoneNumber,dob, address) {
     try {
 
       //connect as admin
@@ -88,6 +88,8 @@ module.exports = {
       patient.firstName = firstName;
       patient.lastName = lastName;
       patient.dob = dob;
+      patient.email=email;
+      patient.phoneNumber=phoneNumber;
       patient.address = address;
       // patient.points = 0;
 

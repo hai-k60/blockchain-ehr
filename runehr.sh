@@ -1,3 +1,4 @@
+#!/bin/sh
 composer archive create -t dir -n .
 composer network install --card PeerAdmin@hlfv1 --archiveFile ehr@0.0.1.bna
 
