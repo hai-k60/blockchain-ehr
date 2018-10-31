@@ -1,25 +1,25 @@
 
-//get all clinician
-query getAllClinician{
-description: "list all the clinician"
+//get all Doctor
+query getAllDoctor{
+description: "list all the Doctor"
 statement:
-      SELECT org.lms.ehr.Clinician
-      FROM org.lms.ehr.Clinician
+      SELECT org.lms.ehr.Doctor
+      FROM org.lms.ehr.Doctor
 }
 
-//get all clinician
-query searchClinician{
-description: "search the clinician"
+//get all Doctor
+query searchDoctor{
+description: "search the Doctor"
 statement:
-      SELECT org.lms.ehr.Clinician
-      WHERE (firstName == _$clinicianName)
+      SELECT org.lms.ehr.Doctor
+      WHERE (firstName == _$DoctorName)
 }
 
-//get all clinician
-query getMyClinician{
-description: "get my clinician"
+//get all Doctor
+query getMyDoctor{
+description: "get my Doctor"
 statement:
-      SELECT org.lms.ehr.Clinician
+      SELECT org.lms.ehr.Doctor
       WHERE (myPatients CONTAINS _$patient)
 }
 

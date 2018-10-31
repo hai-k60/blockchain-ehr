@@ -38,11 +38,11 @@ rule NetworkAdminSystem {
     action: ALLOW
 }
 
-rule R1a_ClinicianSeeUpdateThemselvesOnly {
+rule R1a_DoctorSeeUpdateThemselvesOnly {
   description: "Trader can see and update their own record only"
-  participant(t): "org.lms.ehr.Clinician"
+  participant(t): "org.lms.ehr.Doctor"
   operation: ALL
-  resource(v): "org.lms.ehr.Clinician"
+  resource(v): "org.lms.ehr.Doctor"
   condition: (v.getIdentifier() == t.getIdentifier())
   action: ALLOW
 }
@@ -74,30 +74,30 @@ rule R1d_PatientSeeUpdateOwnMedicalRecord {
   action: ALLOW
 }
 
-rule LimitAccessToAutorisedClinician {
-   description: "A Clinician may updates a medical record which they have permission"
-   participant(h): "org.lms.ehr.Clinician"
+rule LimitAccessToAutorisedDoctor {
+   description: "A Doctor may updates a medical record which they have permission"
+   participant(h): "org.lms.ehr.Doctor"
    operation: READ, UPDATE
    resource(m): "org.lms.ehr.MedicalRecord"
    condition: (
-     m.authorisedClinicians.some(function (authorisedClinician) {
-        return authorisedClinician.getIdentifier() === h.getIdentifier();  
+     m.authorisedDoctors.some(function (authorisedDoctor) {
+        return authorisedDoctor.getIdentifier() === h.getIdentifier();  
         } )
    )
    action: ALLOW
 }
 
-rule R1a_PatientSeeAllClinicians {
-  description: "Patient can see all clinicians"
+rule R1a_PatientSeeAllDoctors {
+  description: "Patient can see all Doctors"
   participant: "org.lms.ehr.Patient"
   operation: ALL
-  resource: "org.lms.ehr.Clinician"
+  resource: "org.lms.ehr.Doctor"
   action: ALLOW
 }
 
-rule ClinicianSeeOnlyTheirPatients {
-   description: "A Clinician see only list of patients they are authorised to modify"
-   participant(h): "org.lms.ehr.Clinician"
+rule DoctorSeeOnlyTheirPatients {
+   description: "A Doctor see only list of patients they are authorised to modify"
+   participant(h): "org.lms.ehr.Doctor"
    operation: READ
    resource(m): "org.lms.ehr.Patient"
    condition: (
@@ -147,7 +147,7 @@ rule LimitAccessToAutorisedLabs {
 }
 
 rule LabSeeOnlyTheirPatients {
-   description: "A Clinician see only list of patients they are authorised to modify"
+   description: "A Doctor see only list of patients they are authorised to modify"
    participant(h): "org.lms.ehr.Lab"
    operation: READ
    resource(m): "org.lms.ehr.Patient"
@@ -176,7 +176,7 @@ rule RevokeAccessLabTran {
 }
 
 rule R1a_PatientSeeAllLab {
-  description: "Patient can see all clinicians"
+  description: "Patient can see all Doctors"
   participant: "org.lms.ehr.Patient"
   operation: ALL
   resource: "org.lms.ehr.Lab"
@@ -189,11 +189,11 @@ rule R1a_PatientSeeAllLab {
 
 
 
-rule R1a_ClinicianSeeAllClinicians {
-  description: "Patient can see all clinicians"
-  participant: "org.lms.ehr.Clinician"
+rule R1a_DoctorSeeAllDoctors {
+  description: "Patient can see all Doctors"
+  participant: "org.lms.ehr.Doctor"
   operation: ALL
-  resource: "org.lms.ehr.Clinician"
+  resource: "org.lms.ehr.Doctor"
   action: ALLOW
 }
 
@@ -211,11 +211,11 @@ rule R1a_EveryoneSeeAllLabs {
 
 */
 
-/*rule R1a_PatientAddMyClinicianInClinician {
+/*rule R1a_PatientAddMyDoctorInDoctor {
   description: "Trader can see and update their own record only"
   participant(t): "org.lms.ehr.Patient"
   operation: READ, UPDATE
-  resource(v): "org.lms.ehr.Clinician"
+  resource(v): "org.lms.ehr.Doctor"
   condition: (
    v.myPatients.some(function (patient) {
       return patient.getIdentifier() === t.getIdentifier();  

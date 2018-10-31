@@ -61,7 +61,7 @@ asset MedicalRecord identified by recordId {
   o String activeHoursInAWeek optional
   o Boolean smoking optional
   --> Patient owner
-  --> Clinician[] authorisedClinicians optional
+  --> Doctor[] authorisedClinicians optional
   --> Lab[] authorisedLabs optional
 }
 
@@ -75,14 +75,14 @@ transaction GrantAccessToLabHr {
 //
 
 transaction GrantAccess {
-  --> Clinician authorisedToModify
+  --> Doctor authorisedToModify
   --> MedicalRecord medicalRecord
 }
 
 
 
 transaction revokeAccess{
-  --> Clinician revokeThisClinician
+  --> Doctor revokeThisClinician
   --> MedicalRecord medicalRecord
 }
 
