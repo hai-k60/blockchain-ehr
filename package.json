@@ -1,6 +1,6 @@
 {
   "engines": {
-    "composer": "^^0.19.4"
+    "composer": "^0.19.4"
   },
   "name": "ehr",
   "version": "0.0.1",
@@ -21,12 +21,12 @@
   "devDependencies": {
     "chai": "latest",
     "chai-as-promised": "latest",
-    "composer-admin": "^^0.19.42",
-    "composer-cli": "^^0.19.4",
-    "composer-client": "^^0.19.4",
-    "composer-common": "^^0.19.4",
-    "composer-connector-embedded": "^^0.19.4",
-    "composer-cucumber-steps": "^^0.19.4",
+    "composer-admin": "^0.19.4",
+    "composer-cli": "^0.19.4",
+    "composer-client": "^0.19.4",
+    "composer-common": "^0.19.4",
+    "composer-connector-embedded": "^0.19.4",
+    "composer-cucumber-steps": "^0.19.4",
     "cucumber": "^2.2.0",
     "eslint": "latest",
     "mkdirp": "latest",
