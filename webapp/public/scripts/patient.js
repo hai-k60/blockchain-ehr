@@ -1,18 +1,20 @@
+//var signIn = require('./network/network.js');
+
 var apiUrl = location.protocol + '//' + location.host + "/api/";
 
 //check user input and call server
-$('.sign-in-member').click(function() {
+$('.sign-in-patient').click(function() {
   updateMember();
 });
 
 function updateMember() {
 
   //get user input data
-  var formAccountNum = $('.account-number input').val();
+  var formAccountNum = $('.patient-id input').val();
   var formCardId = $('.card-id input').val();
 
   //create json data
-  var inputData = '{' + '"accountnumber" : "' + formAccountNum + '", ' + '"cardid" : "' + formCardId + '"}';
+  var inputData = '{' + '"patient-id" : "' + formAccountNum + '", ' + '"cardid" : "' + formCardId + '"}';
   console.log(inputData)
 
   //make ajax call

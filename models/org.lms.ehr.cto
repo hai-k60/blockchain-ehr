@@ -36,6 +36,7 @@ participant Doctor identified by doctorId {
   o String email
   o String Specialisation
   o String address
+  --> Patient[] myPatients optional
 }
 
 participant Lab identified by labId {
@@ -43,6 +44,7 @@ participant Lab identified by labId {
   o String name
   o String email
   o String address
+  --> Patient[] myPatients optional
 }
 
 asset HealthRecord identified by recordId{
@@ -50,7 +52,7 @@ asset HealthRecord identified by recordId{
   o String temperature
   o String bloodPressure
   --> Patient owner
-  --> Doctor doctor
+  --> Doctor[] authorisedDoctors optional
   --> Lab[] authorisedLabs optional
 }
 
@@ -65,7 +67,7 @@ asset MedicalRecord identified by recordId {
   o String activeHoursInAWeek optional
   o Boolean smoking optional
   --> Patient owner
-  --> Doctor[] authorisedClinicians optional
+  --> Doctor[] authorisedDoctors optional
   --> Lab[] authorisedLabs optional
 }
 
@@ -75,7 +77,15 @@ transaction GrantAccessToLabHr {
   --> Lab addThislab
   --> HealthRecord healthRecord
 }
+transaction GrantAccessHr {
+  --> Doctor authorisedToModify
+  --> HealthRecord healthRecord
+}
 
+transaction revokeAccessHr{
+  --> Doctor revokeThisDoctor
+  --> HealthRecord healthRecord
+}
 //
 
 transaction GrantAccess {

@@ -12,7 +12,7 @@ query searchDoctor{
 description: "search the Doctor"
 statement:
       SELECT org.lms.ehr.Doctor
-      WHERE (firstName == _$DoctorName)
+      WHERE (doctorId == _$DoctorID)
 }
 
 //get all Doctor
@@ -27,8 +27,17 @@ query getMedicalRecordOfPatient{
 description: "get medical record of patient"
 statement:
       SELECT org.lms.ehr.MedicalRecord
-      WHERE (owner == _$patientEmail)
+      WHERE (owner == _$patientID)
 }
+
+query getHealthRecordOfPatient{
+description: "get health record of patient"
+statement:
+      SELECT org.lms.ehr.HealthRecord
+      WHERE (owner == _$patientID)
+}
+
+
 
 //get my labs
 query getMyLabs{

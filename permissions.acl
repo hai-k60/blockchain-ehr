@@ -65,7 +65,7 @@ rule R1c_PatientSeeUpdateOwnMedicalRecord {
   action: ALLOW
 }
 
-rule R1d_PatientSeeUpdateOwnMedicalRecord {
+rule R1d_PatientSeeUpdateOwnHealthRecord {
   description: "Patient can see and update their own record only"
   participant(t): "org.lms.ehr.Patient"
   operation: ALL
@@ -73,7 +73,30 @@ rule R1d_PatientSeeUpdateOwnMedicalRecord {
   condition: (v.owner.getIdentifier() == t.getIdentifier())
   action: ALLOW
 }
-
+rule LimitAccessToAutorisedDoctorH {
+   description: "A Doctor may updates a medical record which they have permission"
+   participant(h): "org.lms.ehr.Doctor"
+   operation: READ, UPDATE
+   resource(m): "org.lms.ehr.HealthRecord"
+   condition: (
+     m.authorisedDoctors.some(function (authorisedDoctor) {
+        return authorisedDoctor.getIdentifier() === h.getIdentifier();  
+        } )
+   )
+   action: ALLOW
+}
+rule LimitAccessToAutorisedDoctor1 {
+   description: "A Doctor may updates a medical record which they have permission"
+   participant(h): "org.lms.ehr.Doctor"
+   operation: READ, UPDATE
+   resource(m): "org.lms.ehr.HealthRecord"
+   condition: (
+     m.authorisedDoctors.some(function (authorisedDoctor) {
+        return authorisedDoctor.getIdentifier() === h.getIdentifier();  
+        } )
+   )
+   action: ALLOW
+}
 rule LimitAccessToAutorisedDoctor {
    description: "A Doctor may updates a medical record which they have permission"
    participant(h): "org.lms.ehr.Doctor"
@@ -113,6 +136,13 @@ rule GrantAccessTransaction {
     participant: "org.lms.ehr.Patient"
     operation: ALL
     resource: "org.lms.ehr.GrantAccess"
+    action: ALLOW
+}
+rule GrantAccessTransactionHr {
+    description: "Allow all patient to submit grantAccess transactions"
+    participant: "org.lms.ehr.Patient"
+    operation: ALL
+    resource: "org.lms.ehr.GrantAccessHr"
     action: ALLOW
 }
 

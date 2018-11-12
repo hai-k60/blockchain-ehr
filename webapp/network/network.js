@@ -4,14 +4,14 @@ const { BusinessNetworkDefinition, CertificateUtil, IdCard } = require('composer
 
 //declate namespace
 const namespace = 'org.lms.ehr';
-
+// var window.a=1;
 //in-memory card store for testing so cards are not persisted to the file system
 const cardStore = require('composer-common').NetworkCardStoreManager.getCardStore( { type: 'composer-wallet-inmemory' } );
 
 //admin connection to the blockchain, used to deploy the business network
 let adminConnection;
 
-//this is the business network connection the tests will use.
+//this is the business network connectionProfilection the tests will use.
 let businessNetworkConnection;
 
 let businessNetworkName = 'ehr';
@@ -63,7 +63,17 @@ async function useIdentity(cardName) {
 
 //export module
 module.exports = {
-
+  loginCard:async function(cardId){
+    try{
+      await useIdentity(cardName);
+    }catch(err) {
+      //print and return error
+      console.log(err);
+      var error = {};
+      error.error = err.message;
+      return error;
+    }
+  },
   /*
   * Create patient participant and import card for identity
   * @param {String} cardId Import card id for patient
@@ -84,7 +94,7 @@ module.exports = {
       factory = businessNetworkConnection.getBusinessNetwork().getFactory();
 
       //create patient participant
-      const patient = factory.newResource(namespace, 'Partient', patientID);
+      const patient = factory.newResource(namespace, 'Patient', patientID);
       patient.firstName = firstName;
       patient.lastName = lastName;
       patient.dob = dob;
@@ -117,7 +127,7 @@ module.exports = {
     }
 
   },
-   registerLab: async function (cardId, labID,name, address) {
+   registerLab: async function (cardId, labID,name, address,email) {
     try {
 
       //connect as admin
@@ -131,6 +141,8 @@ module.exports = {
       const lab = factory.newResource(namespace, 'Lab', labID);
       lab.name = name;
       lab.address = address;
+      lab.email=email;
+      lab.myPatients=[];
       // patient.points = 0;
 
       //add patient participant
@@ -159,12 +171,12 @@ module.exports = {
   },
 
   /*
-  * Create Clinician participant and import card for identity
-  * @param {String} cardId Import card id for Clinician
-  * @param {String} ClinicianId Clinician Id as identifier on network
-  * @param {String} name Clinician name
+  * Create Doctor participant and import card for identity
+  * @param {String} cardId Import card id for Doctor
+  * @param {String} DoctorId Doctor Id as identifier on network
+  * @param {String} name Doctor name
   */
-  registerClinician: async function (cardId, clinicianId, firstname,lastName,specialisation,address) {
+  registerDoctor: async function (cardId, DoctorId, firstname,lastName,specialisation,address) {
 
     try {
 
@@ -175,19 +187,20 @@ module.exports = {
       //get the factory for the business network.
       factory = businessNetworkConnection.getBusinessNetwork().getFactory();
 
-      //create Clinician participant
-      const Clinician = factory.newResource(namespace, 'Clinician', clinicianId);
-      Clinician.firstname = firstname;
-      Clinician.lastName=lastName;
-      Clinician.Specialisation=specialisation;
-      Clinician.address=address;
+      //create Doctor participant
+      const Doctor = factory.newResource(namespace, 'Doctor', DoctorId);
+      Doctor.firstname = firstname;
+      Doctor.lastName=lastName;
+      Doctor.Specialisation=specialisation;
+      Doctor.address=address;
+      Doctor.myPatients=[];
 
-      //add Clinician participant
-      const participantRegistry = await businessNetworkConnection.getParticipantRegistry(namespace + '.Clinician');
-      await participantRegistry.add(Clinician);
+      //add Doctor participant
+      const participantRegistry = await businessNetworkConnection.getParticipantRegistry(namespace + '.Doctor');
+      await participantRegistry.add(Doctor);
 
       //issue identity
-      const identity = await businessNetworkConnection.issueIdentity(namespace + '.Clinician#' + clinicianId, cardId);
+      const identity = await businessNetworkConnection.issueIdentity(namespace + '.Doctor#' + DoctorId, cardId);
 
       //import card for identity
       await importCardForIdentity(cardId, identity);
@@ -215,7 +228,7 @@ module.exports = {
   * @param {String} ownerId
   * @param {String} doctorId
   */
-  createHealthRecord: async function(cardId,recordId, temperature, bloodPressure, ownerId, doctorId){
+  createHealthRecord: async function(cardId,recordId, ownerId,){
     try{
       //connect as client via cardId
       businessNetworkConnection= new BusinessNetworkConnection();
@@ -224,11 +237,13 @@ module.exports = {
       factory= businessNetworkConnection.getBusinessNetwork().getFactory();
       //create healthRecord asset
       const HealthRecord = factory.newResource(namespace, 'HealthRecord', recordId);
-      HealthRecord.temperature = temperature;
-      HealthRecord.bloodPressure = bloodPressure;
+      HealthRecord.temperature = '';
+      HealthRecord.bloodPressure = '';
       HealthRecord.owner = factory.newRelationship(namespace, 'Patient', ownerId);
-      HealthRecord.doctor = factory.newRelationship(namespace, 'Doctor', doctorId);
-
+      
+      HealthRecord.authorisedDoctors = [];//factory.newRelationship(namespace,'Doctor', '000001');//factory.newRelationship(namespace, 'Doctor',[]);
+      //console.log(HealthRecord.authorisedDoctors);
+       HealthRecord.authorisedLabs = [];//factory.newRelationship(namespace,'Lab',[]);
       //add Health Record asset
       const assetRegistry = await businessNetworkConnection.getAssetRegistry(namespace+ '.HealthRecord');
       await assetRegistry.add(HealthRecord);
@@ -286,10 +301,10 @@ module.exports = {
   * Perform EarnPoints transaction
   * @param {String} cardId Card id to connect to network
   * @param {String} accountNumber Account number of patient
-  * @param {String} ClinicianId Clinician Id of Clinician
+  * @param {String} DoctorId Doctor Id of Doctor
   * @param {Integer} points Points value
   */
-  earnPointsTransaction: async function (cardId, accountNumber, ClinicianId, points) {
+  earnPointsTransaction: async function (cardId, accountNumber, DoctorId, points) {
 
     try {
 
@@ -304,7 +319,7 @@ module.exports = {
       const earnPoints = factory.newTransaction(namespace, 'EarnPoints');
       earnPoints.points = points;
       earnPoints.patient = factory.newRelationship(namespace, 'patient', accountNumber);
-      earnPoints.Clinician = factory.newRelationship(namespace, 'Clinician', ClinicianId);
+      earnPoints.Doctor = factory.newRelationship(namespace, 'Doctor', DoctorId);
 
       //submit transaction
       await businessNetworkConnection.submitTransaction(earnPoints);
@@ -328,10 +343,10 @@ module.exports = {
   * Perform UsePoints transaction
   * @param {String} cardId Card id to connect to network
   * @param {String} accountNumber Account number of patient
-  * @param {String} ClinicianId Clinician Id of Clinician
+  * @param {String} DoctorId Doctor Id of Doctor
   * @param {Integer} points Points value
   */
-  usePointsTransaction: async function (cardId, accountNumber, ClinicianId, points) {
+  usePointsTransaction: async function (cardId, accountNumber, DoctorId, points) {
 
     try {
 
@@ -346,7 +361,7 @@ module.exports = {
       const usePoints = factory.newTransaction(namespace, 'UsePoints');
       usePoints.points = points;
       usePoints.patient = factory.newRelationship(namespace, 'patient', accountNumber);
-      usePoints.Clinician = factory.newRelationship(namespace, 'Clinician', ClinicianId);
+      usePoints.Doctor = factory.newRelationship(namespace, 'Doctor', DoctorId);
 
       //submit transaction
       await businessNetworkConnection.submitTransaction(usePoints);
@@ -362,6 +377,38 @@ module.exports = {
       var error = {};
       error.error = err.message;
       return error
+    }
+
+  },
+    /*
+  * Get healthRecord data
+  * @param {String} cardId Card id to connect to network
+  * @param {String} accountNumber Account number of patient
+  */
+  healthRecord: async function (cardId, accountNumber) {
+
+    try {
+
+      //connect to network with cardId
+      businessNetworkConnection = new BusinessNetworkConnection();
+      await businessNetworkConnection.connect(cardId);
+
+      //get patient from the network
+      const patientRegistry = await businessNetworkConnection.getParticipantRegistry(namespace + '.patient');
+      const patient = await patientRegistry.get(accountNumber);
+
+      //disconnect
+      await businessNetworkConnection.disconnect(cardId);
+
+      //return patient object
+      return patient;
+    }
+    catch(err) {
+      //print and return error
+      console.log(err);
+      var error = {};
+      error.error = err.message;
+      return error;
     }
 
   },
@@ -400,11 +447,11 @@ module.exports = {
   },
 
   /*
-  * Get Clinician data
+  * Get Doctor data
   * @param {String} cardId Card id to connect to network
-  * @param {String} ClinicianId Clinician Id of Clinician
+  * @param {String} DoctorId Doctor Id of Doctor
   */
-  ClinicianData: async function (cardId, ClinicianId) {
+  DoctorData: async function (cardId, DoctorId) {
 
     try {
 
@@ -413,14 +460,14 @@ module.exports = {
       await businessNetworkConnection.connect(cardId);
 
       //get patient from the network
-      const ClinicianRegistry = await businessNetworkConnection.getParticipantRegistry(namespace + '.Clinician');
-      const Clinician = await ClinicianRegistry.get(ClinicianId);
+      const DoctorRegistry = await businessNetworkConnection.getParticipantRegistry(namespace + '.Doctor');
+      const Doctor = await DoctorRegistry.get(DoctorId);
 
       //disconnect
       await businessNetworkConnection.disconnect(cardId);
 
-      //return Clinician object
-      return Clinician;
+      //return Doctor object
+      return Doctor;
     }
     catch(err) {
       //print and return error
@@ -433,24 +480,24 @@ module.exports = {
   },
 
   /*
-  * Get all Clinicians data
+  * Get all Doctors data
   * @param {String} cardId Card id to connect to network
   */
-  allCliniciansInfo : async function (cardId) {
+  allDoctorsInfo : async function (cardId) {
 
     try {
       //connect to network with cardId
       businessNetworkConnection = new BusinessNetworkConnection();
       await businessNetworkConnection.connect(cardId);
 
-      //query all Clinicians from the network
-      const allClinicians = await businessNetworkConnection.query('selectClinicians');
+      //query all Doctors from the network
+      const allDoctors = await businessNetworkConnection.query('selectDoctors');
 
       //disconnect
       await businessNetworkConnection.disconnect(cardId);
 
-      //return allClinicians object
-      return allClinicians;
+      //return allDoctors object
+      return allDoctors;
     }
     catch(err) {
       //print and return error

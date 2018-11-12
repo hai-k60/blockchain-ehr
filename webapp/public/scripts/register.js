@@ -1,7 +1,8 @@
 var apiUrl = location.protocol + '//' + location.host + "/api/";
 console.log(apiUrl);
 console.log("at register.js");
-
+// console.log(a);
+//console.log("test:"+username);
 //check user input and call server to create dataset
 $('.register-patient').click(function() {
 
@@ -14,7 +15,7 @@ $('.register-patient').click(function() {
   var formDob = $('.dob input').val();
   var formPhoneNumber = $('.phone-number input').val();
   var formAdress = $('.address-patient input').val();
-  console.log(formAdress);
+  // console.log(formAdress);
   //create json data
   var inputData = '{' + '"dob" : "' + formDob + '", ' + '"adress" : "' + formAdress + '", ' + '"firstname" : "' + formFirstName + '", ' + '"lastname" : "' + formLastName + '", ' + '"email" : "' + formEmail + '", ' + '"phonenumber" : "' + formPhoneNumber + '", ' + '"PatientId" : "' + formPatientId + '", ' + '"cardid" : "' + formCardId + '"}';
   console.log(inputData)

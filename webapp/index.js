@@ -2,6 +2,7 @@
 
 //get libraries
 const express = require('express');
+var cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const request = require('request');
 const path = require('path')
@@ -16,6 +17,13 @@ var validate = require('./network/validate.js');
 var analysis = require('./network/analysis.js');
 
 //bootstrap application settings
+// app.use(session(
+// 	{
+// 	secret:'tung',
+// 	resave: true,
+// 	saveUninitialized:true
+// 	}));
+app.use(cookieParser());
 app.use(express.static('./public'));
 app.use('/scripts', express.static(path.join(__dirname, '/public/scripts')));
 app.use(bodyParser.json());
@@ -28,6 +36,11 @@ app.get('/home', function(req, res) {
 //get Patient registration page
 app.get('/registerPatient', function(req, res) {
   res.sendFile(path.join(__dirname + '/public/registerPatient.html'));
+});
+
+//get Patient registration page
+app.get('/patient', function(req, res) {
+  res.sendFile(path.join(__dirname + '/public/Patient.html'));
 });
 
 
@@ -67,10 +80,23 @@ app.post('/api/registerPatient', function(req, res) {
                 error: response.error
               });
             } else {
-              //else return success
-              res.json({
-                success: response
-              });
+
+            	//register healthRecord
+            	network.createHealthRecord(cardId,PatientId,PatientId)
+            	.then((response)=>{
+            		if(response.error!=null){
+            			res.json({
+            				error: response.error
+            			});
+            		}else {
+            			              //else return success
+		              res.json({
+		                success: response
+		              });
+            		}
+
+            	});
+
             }
           });
       }
@@ -79,6 +105,93 @@ app.post('/api/registerPatient', function(req, res) {
 
 });
 
+
+//post call to retrieve patient data, transactions data and partners to perform transactions with from the network
+app.post('/api/patientData', function(req, res) {
+
+  //declare variables to retrieve from request
+  var accountNumber = req.body.accountnumber;
+  var cardId = req.body.cardid;
+
+  //print variables
+  console.log('patientData using param - ' + ' accountNumber: ' + accountNumber + ' cardId: ' + cardId);
+
+  //declare return object
+  var returnData = {};
+
+  //get patient data from network
+  network.patientData(cardId, accountNumber)
+    .then((patient) => {
+      //return error if error in response
+      if (patient.error != null) {
+        res.json({
+          error: patient.error
+        });
+      } else {
+        //else add patient data to return object
+        returnData.patientId = patient.patientId;
+        returnData.firstName = patient.firstName;
+        returnData.lastName = patient.lastName;
+        returnData.phoneNumber = patient.phoneNumber;
+        returnData.email = patient.email;
+        returnData.dob = patient.dob;
+        returnData.address = patient.address;
+        //returnData.points = patient.points;
+      }
+
+    })
+    .then(() => {
+      //get UsePoints transactions from the network
+      network.usePointsTransactionsInfo(cardId)
+        .then((usePointsResults) => {
+          //return error if error in response
+          if (usePointsResults.error != null) {
+            res.json({
+              error: usePointsResults.error
+            });
+          } else {
+            //else add transaction data to return object
+            returnData.usePointsResults = usePointsResults;
+          }
+
+        }).then(() => {
+          //get EarnPoints transactions from the network
+          network.earnPointsTransactionsInfo(cardId)
+            .then((earnPointsResults) => {
+              //return error if error in response
+              if (earnPointsResults.error != null) {
+                res.json({
+                  error: earnPointsResults.error
+                });
+              } else {
+                //else add transaction data to return object
+                returnData.earnPointsResult = earnPointsResults;
+              }
+
+            })
+            .then(() => {
+              //get partners to transact with from the network
+              network.allPartnersInfo(cardId)
+              .then((partnersInfo) => {
+                //return error if error in response
+                if (partnersInfo.error != null) {
+                  res.json({
+                    error: partnersInfo.error
+                  });
+                } else {
+                  //else add partners data to return object
+                  returnData.partnersData = partnersInfo;
+                }
+
+                //return returnData
+                res.json(returnData);
+
+              });
+            });
+        });
+    });
+
+});
 
 
 //declare port
