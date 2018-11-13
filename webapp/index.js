@@ -55,13 +55,13 @@ app.post('/api/registerPatient', function(req, res) {
   var email = req.body.email;
   var phoneNumber = req.body.phonenumber;
   var dob = req.body.dob;
-  var adress = req.body.adress;
+  var address = req.body.address;
 
   //print variables
-  console.log('Using param - firstname: ' + firstName + ' lastname: ' + lastName + ' email: ' + email + ' phonenumber: ' + phoneNumber + ' PatientId: ' + PatientId + ' cardId: ' + cardId + 'adress' + adress + 'dob' +dob);
+  console.log('Using param - firstname: ' + firstName + ' lastname: ' + lastName + ' email: ' + email + ' phonenumber: ' + phoneNumber + ' PatientId: ' + PatientId + ' cardId: ' + cardId + 'address' + address + 'dob' +dob);
 
   //validate Patient registration fields
-  validate.validatePatientRegistration(cardId, PatientId, firstName, lastName, email, phoneNumber, adress , dob)
+  validate.validatePatientRegistration(cardId, PatientId, firstName, lastName, email, phoneNumber, dob,address)
     .then((response) => {
       //return error if error in response
       if (response.error != null) {
@@ -72,7 +72,7 @@ app.post('/api/registerPatient', function(req, res) {
         return;
       } else {
         //else register Patient on the network
-        network.registerPatient(cardId, PatientId, firstName, lastName, email, phoneNumber , adress , dob)
+        network.registerPatient(cardId, PatientId, firstName, lastName, email, phoneNumber , address , dob)
           .then((response) => {
             //return error if error in response
             if (response.error != null) {
@@ -109,8 +109,9 @@ app.post('/api/registerPatient', function(req, res) {
 //post call to retrieve patient data, transactions data and partners to perform transactions with from the network
 app.post('/api/patientData', function(req, res) {
 
-  //declare variables to retrieve from request
-  var accountNumber = req.body.accountnumber;
+  //declare variables to retrieve from request\
+  //console.log(req);
+  var accountNumber = req.body.patientid;
   var cardId = req.body.cardid;
 
   //print variables
@@ -137,60 +138,27 @@ app.post('/api/patientData', function(req, res) {
         returnData.dob = patient.dob;
         returnData.address = patient.address;
         //returnData.points = patient.points;
+        // console.log("ok baby");
       }
-
+      //console.log(returnData);
     })
     .then(() => {
-      //get UsePoints transactions from the network
-      network.usePointsTransactionsInfo(cardId)
-        .then((usePointsResults) => {
+      //get healthRecord transactions from the network
+      network.healthRecord(cardId,accountNumber)
+        .then((healthRecord) => {
           //return error if error in response
-          if (usePointsResults.error != null) {
+          if (healthRecord.error != null) {
             res.json({
-              error: usePointsResults.error
+              error: healthRecord.error
             });
           } else {
             //else add transaction data to return object
-            returnData.usePointsResults = usePointsResults;
+            returnData.healthRecord = healthRecord;
           }
-
-        }).then(() => {
-          //get EarnPoints transactions from the network
-          network.earnPointsTransactionsInfo(cardId)
-            .then((earnPointsResults) => {
-              //return error if error in response
-              if (earnPointsResults.error != null) {
-                res.json({
-                  error: earnPointsResults.error
-                });
-              } else {
-                //else add transaction data to return object
-                returnData.earnPointsResult = earnPointsResults;
-              }
-
-            })
-            .then(() => {
-              //get partners to transact with from the network
-              network.allPartnersInfo(cardId)
-              .then((partnersInfo) => {
-                //return error if error in response
-                if (partnersInfo.error != null) {
-                  res.json({
-                    error: partnersInfo.error
-                  });
-                } else {
-                  //else add partners data to return object
-                  returnData.partnersData = partnersInfo;
-                }
-
-                //return returnData
-                res.json(returnData);
-
-              });
-            });
+          res.json(returnData);
         });
     });
-
+    //console.log(returnData);
 });
 
 

@@ -237,8 +237,8 @@ module.exports = {
       factory= businessNetworkConnection.getBusinessNetwork().getFactory();
       //create healthRecord asset
       const HealthRecord = factory.newResource(namespace, 'HealthRecord', recordId);
-      HealthRecord.temperature = '';
-      HealthRecord.bloodPressure = '';
+      HealthRecord.temperature = '36';
+      HealthRecord.bloodPressure = '120/70';
       HealthRecord.owner = factory.newRelationship(namespace, 'Patient', ownerId);
       
       HealthRecord.authorisedDoctors = [];//factory.newRelationship(namespace,'Doctor', '000001');//factory.newRelationship(namespace, 'Doctor',[]);
@@ -385,23 +385,22 @@ module.exports = {
   * @param {String} cardId Card id to connect to network
   * @param {String} accountNumber Account number of patient
   */
-  healthRecord: async function (cardId, accountNumber) {
+  healthRecord: async function (cardId,patientID) {
 
     try {
-
+      
       //connect to network with cardId
       businessNetworkConnection = new BusinessNetworkConnection();
       await businessNetworkConnection.connect(cardId);
-
-      //get patient from the network
-      const patientRegistry = await businessNetworkConnection.getParticipantRegistry(namespace + '.patient');
-      const patient = await patientRegistry.get(accountNumber);
-
+      let input='resource:org.lms.ehr.Patient#' +patientID;
+      // console.log("xxxx:"+ input);
+      //get healthRecord from the network
+      const healthRecord = await businessNetworkConnection.query('getHealthRecordOfPatient',{patientID:input});
       //disconnect
       await businessNetworkConnection.disconnect(cardId);
 
       //return patient object
-      return patient;
+      return healthRecord;
     }
     catch(err) {
       //print and return error
@@ -427,18 +426,18 @@ module.exports = {
       await businessNetworkConnection.connect(cardId);
 
       //get patient from the network
-      const patientRegistry = await businessNetworkConnection.getParticipantRegistry(namespace + '.patient');
+      const patientRegistry = await businessNetworkConnection.getParticipantRegistry(namespace + '.Patient');
       const patient = await patientRegistry.get(accountNumber);
 
       //disconnect
       await businessNetworkConnection.disconnect(cardId);
-
+      //console.log(Patient);
       //return patient object
       return patient;
     }
     catch(err) {
       //print and return error
-      console.log(err);
+      //console.log(err);
       var error = {};
       error.error = err.message;
       return error;

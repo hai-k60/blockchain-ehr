@@ -17,7 +17,7 @@ $('.register-patient').click(function() {
   var formAdress = $('.address-patient input').val();
   // console.log(formAdress);
   //create json data
-  var inputData = '{' + '"dob" : "' + formDob + '", ' + '"adress" : "' + formAdress + '", ' + '"firstname" : "' + formFirstName + '", ' + '"lastname" : "' + formLastName + '", ' + '"email" : "' + formEmail + '", ' + '"phonenumber" : "' + formPhoneNumber + '", ' + '"PatientId" : "' + formPatientId + '", ' + '"cardid" : "' + formCardId + '"}';
+  var inputData = '{' + '"dob" : "' + formDob + '", ' + '"address" : "' + formAdress + '", ' + '"firstname" : "' + formFirstName + '", ' + '"lastname" : "' + formLastName + '", ' + '"email" : "' + formEmail + '", ' + '"phonenumber" : "' + formPhoneNumber + '", ' + '"PatientId" : "' + formPatientId + '", ' + '"cardid" : "' + formCardId + '"}';
   console.log(inputData)
 
   //make ajax call to add the dataset

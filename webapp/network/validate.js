@@ -9,7 +9,7 @@ module.exports = {
   * @param {String} phoneNumber
   * @param {String} email
   */
-  validatePatientRegistration: async function(cardId, PatientId, firstName, lastName, email, phoneNumber, adress , dob) {
+  validatePatientRegistration: async function(cardId, PatientId, firstName, lastName, email, phoneNumber, address , dob) {
 
     var response = {};
 

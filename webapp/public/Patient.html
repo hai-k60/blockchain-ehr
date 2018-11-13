@@ -31,7 +31,7 @@
         <li class="nav-item text-nowrap dropdown">
           <a class="nav-link dropdown-toggle " href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sign-in</a>
           <div class="dropdown-menu" aria-labelledby="dropdown01">
-            <a class="dropdown-item" href="/member">Member</a>
+            <a class="dropdown-item" href="/doctor">Doctor</a>
             <a class="dropdown-item" href="/patient">Patient</a>
           </div>
         </li>
@@ -44,7 +44,7 @@
     <div class="container">
       <h2>Patient Sign In</h2>
       <br>
-      <div class="Patient-id">
+      <div class="patient-id">
         <p> Enter Patient ID
           <input>
         </p>
@@ -59,7 +59,7 @@
   </div>
 
 
-  <div id="transactionSection" style="display:block;">
+  <div id="transactionSection" style="display:none;">
 
 
     <div class="jumbotron" id="headSection" style="display:block;">
@@ -81,13 +81,16 @@
       </div>
     </div>
 
-    <div class="container">
+    <div class="container" >
 
       <div class="row">
 
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item tab-width">
             <a class="nav-link active" id="dashboard-tab" data-toggle="tab" href="#dashboard" role="tab" aria-controls="earn" aria-selected="true">Dashboard</a>
+          </li>
+          <li class="nav-item tab-width">
+            <a class="nav-link " id="healthRecord-tab" data-toggle="tab" href="#healthRecord" role="tab" aria-controls="healthRecord" aria-selected="false">Health Record</a>
           </li>
           <li class="nav-item tab-width">
             <a class="nav-link" id="transactions-tab" data-toggle="tab" href="#transactions" role="tab" aria-controls="transactions" aria-selected="false">Transactions</a>
@@ -98,8 +101,24 @@
         <div class="tab-content" id="myTabContent">
           <div class="tab-pane fade show active" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
             <br>
-            <h3>Points Usage</h3>
-            <div class="dashboards"></div>
+            <h3>Information Patient</h3>
+            <div class="dashboards">
+            <!-- <tr>Name : <input type="text-center"id ='nameOfPatient'></tr> -->
+
+            </div>
+          </div>
+          <div class="tab-pane fade" id="healthRecord" role="tabpanel" aria-labelledby="healthRecord-tab">
+            <br>
+            <h3>Information Health Record</h3>
+            <div class="healthRecord">
+
+
+            </div>
+            <br>
+            <div>
+              <h4>------------------------------------------------------------------</h4>
+              <h3><b> Grant Access Health Record for Doctor</b></h3>
+            </div>
           </div>
 
           <div class="tab-pane fade" id="transactions" role="tabpanel" aria-labelledby="transactions-tab">
