@@ -9,7 +9,7 @@ module.exports = {
   * @param {String} phoneNumber
   * @param {String} email
   */
-  validatePatientRegistration: async function(cardId, PatientId, firstName, lastName, email, phoneNumber, address , dob) {
+  validatePatientRegistration: async function (cardId, PatientId, firstName, lastName, email, phoneNumber, address, dob) {
 
     var response = {};
 
@@ -74,38 +74,69 @@ module.exports = {
   },
 
   /*
-  * Validata partner registration fields ensuring the fields meet the criteria
+  * Validata member registration fields ensuring the fields meet the criteria
   * @param {String} cardId
-  * @param {String} partnerId
-  * @param {String} name
+  * @param {String} DoctorId
+  * @param {String} firstName
+  * @param {String} lastName
+  * @param {String} phoneNumber
+  * @param {String} email
   */
-  validatePartnerRegistration: async function(cardId, partnerId, name) {
+  validateDoctorRegistration: async function (cardId, DoctorId, firstName, lastName, email, phoneNumber, specialisation, address) {
 
     var response = {};
 
     //verify input otherwise return error with an informative message
-    if (cardId.length < 1) {
+    if (DoctorId.length < 6) {
+      response.error = "Account number must be at least six digits long";
+      console.log(response.error);
+      return response;
+    } else if (!isInt(DoctorId)) {
+      response.error = "Account number must be all numbers";
+      console.log(response.error);
+      return response;
+    } else if (DoctorId.length > 25) {
+      response.error = "Account number must be less than 25 digits";
+      console.log(response.error);
+      return response;
+    } else if (cardId.length < 1) {
       response.error = "Enter access key";
       console.log(response.error);
       return response;
     } else if (!/^[0-9a-zA-Z]+$/.test(cardId)) {
-      response.error = "Access key can be letters and numbers only";
+      response.error = "Card id can be letters and numbers only";
       console.log(response.error);
       return response;
-    } else if (partnerId.length < 1) {
-      response.error = "Enter partner id";
+    } else if (firstName.length < 1) {
+      response.error = "Enter first name";
       console.log(response.error);
       return response;
-    } else if (!/^[0-9a-zA-Z]+$/.test(partnerId)) {
-      response.error = "Partner id can be letters and numbers only";
+    } else if (!/^[a-zA-Z]+$/.test(firstName)) {
+      response.error = "First name must be letters only";
       console.log(response.error);
       return response;
-    } else if (name.length < 1) {
-      response.error = "Enter company name";
+    } else if (lastName.length < 1) {
+      response.error = "Enter last name";
       console.log(response.error);
       return response;
-    } else if (!/^[a-zA-Z]+$/.test(name)) {
-      response.error = "Company name must be letters only";
+    } else if (!/^[a-zA-Z]+$/.test(lastName)) {
+      response.error = "First name must be letters only";
+      console.log(response.error);
+      return response;
+    } else if (email.length < 1) {
+      response.error = "Enter email";
+      console.log(response.error);
+      return response;
+    } else if (!validateEmail(email)) {
+      response.error = "Enter valid email";
+      console.log(response.error);
+      return response;
+    } else if (phoneNumber.length < 1) {
+      response.error = "Enter phone number";
+      console.log(response.error);
+      return response;
+    } else if (!validatePhoneNumber(phoneNumber)) {
+      response.error = "Enter valid phone number";
       console.log(response.error);
       return response;
     } else {
@@ -115,7 +146,7 @@ module.exports = {
 
   },
 
-  validatePoints: async function(points) {
+  validatePoints: async function (points) {
 
     //verify input otherwise return error with an informative message
     if (isNaN(points)) {
@@ -133,7 +164,7 @@ module.exports = {
 
 //stackoverflow
 function isInt(value) {
-  return !isNaN(value) && (function(x) {
+  return !isNaN(value) && (function (x) {
     return (x | 0) === x;
   })(parseFloat(value))
 }

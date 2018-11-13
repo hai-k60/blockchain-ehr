@@ -34,8 +34,9 @@ participant Doctor identified by doctorId {
   o String firstName
   o String lastName
   o String email
-  o String Specialisation
+  o String specialisation
   o String address
+  o String phoneNumber
   --> Patient[] myPatients optional
 }
 

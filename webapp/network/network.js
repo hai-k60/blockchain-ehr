@@ -176,7 +176,7 @@ module.exports = {
   * @param {String} DoctorId Doctor Id as identifier on network
   * @param {String} name Doctor name
   */
-  registerDoctor: async function (cardId, DoctorId, firstname,lastName,specialisation,address) {
+  registerDoctor: async function (cardId, DoctorId, firstName, lastName, email, phoneNumber, address, specialisation) {
 
     try {
 
@@ -189,11 +189,13 @@ module.exports = {
 
       //create Doctor participant
       const Doctor = factory.newResource(namespace, 'Doctor', DoctorId);
-      Doctor.firstname = firstname;
-      Doctor.lastName=lastName;
-      Doctor.Specialisation=specialisation;
-      Doctor.address=address;
-      Doctor.myPatients=[];
+      Doctor.firstName = firstName;
+      Doctor.lastName = lastName;
+      Doctor.specialisation = specialisation;
+      Doctor.email = email;
+      Doctor.phoneNumber = phoneNumber;
+      Doctor.address = address;
+      Doctor.myPatients = [];
 
       //add Doctor participant
       const participantRegistry = await businessNetworkConnection.getParticipantRegistry(namespace + '.Doctor');
@@ -210,7 +212,7 @@ module.exports = {
 
       return true;
     }
-    catch(err) {
+    catch (err) {
       //print and return error
       console.log(err);
       var error = {};
@@ -259,8 +261,76 @@ module.exports = {
       error.error = err.message;
       return error;
     }
-  }
-  ,
+  },
+    /*
+  * Perform GrantAccessHr transaction
+  * @param {String} cardId Card id to connect to network
+  * @param {String} recordId identified of HealthRecord
+  * @param {String} labId identified of Lab
+  */
+  grantAccessHrTransaction: async function(cardId, recordId, doctorId){
+      try{
+      businessNetworkConnection = new BusinessNetworkConnection();
+      await businessNetworkConnection.connect(cardId);
+
+      //get the factory for the business network.
+      factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+
+      //creat transaction
+      const grantaccesstoLab= factory.newTransaction(namespace, 'GrantAccessHr');
+      grantaccesstoLab.authorisedToModify= factory.newRelationship(namespace, 'Doctor', doctorId);
+      grantaccesstoLab.healthRecord= factory.newRelationship(namespace, 'HealthRecord', recordId);
+
+      //submit transaction
+      await businessNetworkConnection.submitTransaction(grantaccesstoLab);
+
+      //disconnect
+      await businessNetworkConnection.disconnect(cardId);
+      return true;
+
+      }catch(err) {
+      //print and return error
+      console.log(err);
+      var error = {};
+      error.error = err.message;
+      return error;
+    }
+  },
+  /*
+  * Perform RevokeAccessHr transaction
+  * @param {String} cardId Card id to connect to network
+  * @param {String} recordId identified of HealthRecord
+  * @param {String} labId identified of Lab
+  */
+  revokeAccessHrTransaction: async function(cardId, recordId, doctorId){
+      try{
+      businessNetworkConnection = new BusinessNetworkConnection();
+      await businessNetworkConnection.connect(cardId);
+
+      //get the factory for the business network.
+      factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+
+      //creat transaction
+      const revokeaccess= factory.newTransaction(namespace, 'revokeAccessHr');
+      revokeaccess.revokeThisDoctor= factory.newRelationship(namespace, 'Doctor', doctorId);
+      revokeaccess.healthRecord= factory.newRelationship(namespace, 'HealthRecord', recordId);
+
+      //submit transaction
+      await businessNetworkConnection.submitTransaction(revokeaccess);
+
+      //disconnect
+      await businessNetworkConnection.disconnect(cardId);
+      return true;
+
+      }catch(err) {
+      //print and return error
+      console.log(err);
+      var error = {};
+      error.error = err.message;
+      return error;
+    }
+
+  },
   /*
   * Perform GrantAccessToLabHr transaction
   * @param {String} cardId Card id to connect to network
@@ -397,6 +467,7 @@ module.exports = {
       //get healthRecord from the network
       const healthRecord = await businessNetworkConnection.query('getHealthRecordOfPatient',{patientID:input});
       //disconnect
+      // console.log(healthRecord);
       await businessNetworkConnection.disconnect(cardId);
 
       //return patient object
@@ -444,6 +515,46 @@ module.exports = {
     }
 
   },
+   /*
+  * Get patient data
+  * @param {String} cardId Card id to connect to network
+  * @param {String} accountNumber Account number of patient
+  */
+  updateHealthRecordData: async function (cardId,recordId,temperature,bloodPressure,image) {
+
+    try {
+
+      //connect to network with cardId
+      businessNetworkConnection = new BusinessNetworkConnection();
+      await businessNetworkConnection.connect(cardId);
+      const assetRegistry = await businessNetworkConnection.getAssetRegistry(namespace + '.HealthRecord');
+      const healthRecord = await assetRegistry.get(recordId);
+          healthRecord.temperature =temperature;
+          healthRecord.bloodPressure=bloodPressure;
+      await assetRegistry.update(healthRecord);
+
+        await businessNetworkConnection.disconnect(cardId);
+        return true;
+      //get patient from the network
+      // const patientRegistry = await businessNetworkConnection.getParticipantRegistry(namespace + '.Patient');
+      // const patient = await patientRegistry.get(accountNumber);
+
+      // //disconnect
+      // await businessNetworkConnection.disconnect(cardId);
+      // //console.log(Patient);
+      // //return patient object
+      // return patient;
+    }
+    catch(err) {
+      //print and return error
+      //console.log(err);
+      var error = {};
+      error.error = err.message;
+      return error;
+    }
+
+  },
+
 
   /*
   * Get Doctor data
@@ -490,7 +601,7 @@ module.exports = {
       await businessNetworkConnection.connect(cardId);
 
       //query all Doctors from the network
-      const allDoctors = await businessNetworkConnection.query('selectDoctors');
+      const allDoctors = await businessNetworkConnection.query('getAllDoctor');
 
       //disconnect
       await businessNetworkConnection.disconnect(cardId);

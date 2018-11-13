@@ -153,6 +153,13 @@ rule RevokeAccessTransaction {
     resource: "org.lms.ehr.revokeAccess"
     action: ALLOW
 }
+rule RevokeAccessHrTransaction {
+    description: "Allow all patient to submit RevokeAccess transactions"
+    participant: "org.lms.ehr.Patient"
+    operation: ALL
+    resource: "org.lms.ehr.revokeAccessHr"
+    action: ALLOW
+}
 
 rule R1a_LabsSeeUpdateThemselvesOnly {
   description: "Trader can see and update their own record only"

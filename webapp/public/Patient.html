@@ -54,6 +54,9 @@
           <input>
         </p>
       </div>
+      <div class="healthRecord-id" style="visibility: hidden;">
+        <input type="text-center" name="healthRecord-id">
+      </div>
       <button class="btn btn-primary sign-in-patient">SIGN IN</button>
     </div>
   </div>
@@ -115,11 +118,91 @@
 
             </div>
             <br>
+             <p>
+              <button class="btn btn-primary " data-toggle="modal" data-target="#myModal">Update Health Record </button> <br />
+            </p>
+            <p>Transaction </p>
+            <br>
+
+            <!-- Modal -->
+            <div id="myModal" class="modal fade" role="dialog">
+              <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  </div>
+                  <div class="update-temperature">
+                    <b>Temperature: </b><input type="text-center" id="update-temperature">
+                  </div>
+                  <div class="update-bloodPressure">
+                    <b>Blood Pressure: </b><input type="text-center" id="update-bloodPressure">
+                  </div>                  
+                  <div class="modal-footer">
+                    <button type="button" id ="myModalclose" "class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary submit-update-healthRecord">Save changes</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <ul class="nav nav-tabs" id="transactionsTypeTab" role="tablist">
+              <li class="nav-item ">
+                <a class="nav-link active" id="transactions-doctor-tab" data-toggle="tab" href="#transactions-doctor" role="tab" aria-controls="transactions-doctor" aria-selected="true">Doctor</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" id="transactions-lab-tab" data-toggle="tab" href="#transactions-lab" role="tab" aria-controls="transactions-lab" aria-selected="false">Lab</a>
+              </li>
+            </ul>
+
+            <div class="tab-content" id="myTabContent">
+              <div class="tab-pane fade show active" id="transactions-doctor" role="tabpanel" aria-labelledby="transactions-doctor-tab">
+                <br>
+                <h4>Grant Access HealthRecord for Doctor</h4>
+                <br>
+                <div class="grantAccess-doctor"> 
+                  <select class="form-control">
+                    <option disabled="" selected="" value="disabled">Loading...</option>
+                    </select>
+                </div>
+                <br>
+            <p>
+              <button class="btn btn-primary submit-grant-doctor">Grant Doctor </button> <br />
+            </p>
+                <br>
+                <h4>Revoke Access HealthRecord for Doctor</h4>
+                <br>
+                <div class="revokeAccess-doctor"> 
+                  <select class="form-control">
+                    <option disabled="" selected="" value="disabled">Loading...</option>
+                    </select>
+                </div>
+                <br>
+            <p>
+              <button class="btn btn-primary submit-revoke-doctor">Revoke Doctor </button> <br />
+            </p>
+              </div>
+
+              <div class="tab-pane fade " id="transactions-lab" role="tabpanel" aria-labelledby="transactions-lab-tab">
+                <br>
+                <h4>Grant Access HealthRecord for Lab</h4>
+                <br>
+                <div class="grantAccess-lab"> </div>
+                <br><br>
+                <h4>Revoke Access HealthRecord for Lab</h4>
+                <br>
+                <div class="revokeAccess-lab"> </div>
+
+              </div>
+            <!-- <br>
             <div>
               <h4>------------------------------------------------------------------</h4>
               <h3><b> Grant Access Health Record for Doctor</b></h3>
-            </div>
+            </div> -->
           </div>
+        </div>
 
           <div class="tab-pane fade" id="transactions" role="tabpanel" aria-labelledby="transactions-tab">
             <br>

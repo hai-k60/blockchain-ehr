@@ -37,6 +37,15 @@ app.get('/home', function(req, res) {
 app.get('/registerPatient', function(req, res) {
   res.sendFile(path.join(__dirname + '/public/registerPatient.html'));
 });
+// get Doctor registration page
+app.get('/registerDoctor', function (req, res) {
+  res.sendFile(path.join(__dirname + '/public/registerDoctor.html'));
+});
+
+//get Doctor registration page
+app.get('/doctor', function (req, res) {
+  res.sendFile(path.join(__dirname + '/public/Doctor.html'));
+});
 
 //get Patient registration page
 app.get('/patient', function(req, res) {
@@ -89,7 +98,7 @@ app.post('/api/registerPatient', function(req, res) {
             				error: response.error
             			});
             		}else {
-            			              //else return success
+            			//else return success
 		              res.json({
 		                success: response
 		              });
@@ -97,6 +106,56 @@ app.post('/api/registerPatient', function(req, res) {
 
             	});
 
+            }
+          });
+      }
+    });
+
+
+});
+
+//
+
+//post call to register Doctor on the network
+app.post('/api/registerDoctor', function (req, res) {
+
+  //declare variables to retrieve from request
+  var DoctorId = req.body.DoctorId;
+  var cardId = req.body.cardid;
+  var firstName = req.body.firstName;
+  var lastName = req.body.lastName;
+  var email = req.body.email;
+  var phoneNumber = req.body.phoneNumber;
+  var specialisation = req.body.specialisation;
+  var address = req.body.address;
+
+  //print variables
+  console.log('Using param - firstName: ' + firstName + ' lastName: ' + lastName + ' email: ' + email + ' phoneNumber: ' + phoneNumber + ' DoctorId: ' + DoctorId + ' cardId: ' + cardId + 'address' + address + 'specialisation' + specialisation);
+
+  //validate Doctor registration fields
+  validate.validateDoctorRegistration(cardId, DoctorId, firstName, lastName, email, phoneNumber, specialisation, address)
+    .then((response) => {
+      //return error if error in response
+      if (response.error != null) {
+        res.json({
+          error: response.error
+
+        });
+        return;
+      } else {
+        //else register Doctor on the network
+        network.registerDoctor(cardId, DoctorId, firstName, lastName, email, phoneNumber, address, specialisation)
+          .then((response) => {
+            //return error if error in response
+            if (response.error != null) {
+              res.json({
+                error: response.error
+              });
+            } else {
+              //else return success
+              res.json({
+                success: response
+              });
             }
           });
       }
@@ -161,6 +220,233 @@ app.post('/api/patientData', function(req, res) {
     //console.log(returnData);
 });
 
+//
+//post call to retrieve patient data, transactions data and partners to perform transactions with from the network
+app.post('/api/doctorData', function(req, res) {
+
+  //declare variables to retrieve from request\
+  //console.log(req);
+  var accountNumber = req.body.doctorid;
+  var cardId = req.body.cardid;
+
+  //print variables
+  console.log('doctorData using param - ' + ' accountNumber: ' + accountNumber + ' cardId: ' + cardId);
+
+  //declare return object
+  var returnData = {};
+
+  //get patient data from network
+  network.DoctorData(cardId, accountNumber)
+    .then((doctor) => {
+      //return error if error in response
+      if (doctor.error != null) {
+        res.json({
+          error: doctor.error
+        });
+      } else {
+      	//console.log(doctor.myPatients);
+        //else add patient data to return object
+        returnData=doctor;
+      	}
+          res.json(returnData);
+        });
+});
+    //console.log(returnData);
+
+
+//post call to retrieve patient data, transactions data and partners to perform transactions with from the network
+app.post('/api/getAllDoctor', function(req, res) {
+
+  //declare variables to retrieve from request\
+  //console.log(req);
+  //var card = req.body.patientid;
+  var cardId = req.body.cardid;
+
+  //print variables
+  console.log('patientData using param - ' + ' cardId: ' + cardId);
+
+  //declare return object
+  var returnData = {};
+
+  //get patient data from network
+  network.allDoctorsInfo(cardId)
+    .then((doctor) => {
+      //return error if error in response
+      if (doctor.error != null) {
+        res.json({
+          error: doctor.error
+        });
+      } else {
+        //else add patient data to return object
+        returnData.doctor=doctor;
+      }
+      res.json(returnData);
+      //console.log(returnData);
+    });
+    //console.log(returnData);
+});
+
+//post call to retrieve patient data, transactions data and partners to perform transactions with from the network
+app.post('/api/getHealthRecordForDoctor', function(req, res) {
+
+  //declare variables to retrieve from request\
+  //console.log(req);
+  var accountNumber = req.body.patientId;
+  var cardId = req.body.cardid;
+
+  //print variables
+  console.log('patientData using param - ' + ' cardId: ' + cardId + ' patientId: '+ accountNumber);
+
+  //declare return object
+  var returnData = {};
+
+  //get patient data from network
+      //get healthRecord transactions from the network
+  network.healthRecord(cardId,accountNumber)
+        .then((healthRecord) => {
+          //return error if error in response
+          if (healthRecord.error != null) {
+            res.json({
+              error: healthRecord.error
+            });
+          } else {
+            //else add transaction data to return object
+            // console.log(healthRecord[0].owner);
+            returnData.recordId = healthRecord[0].recordId;
+            returnData.temperature =healthRecord[0].temperature;
+            returnData.bloodPressure=healthRecord[0].bloodPressure;
+          }
+          //res.json(returnData);
+        })
+            .then(() => {
+      //get healthRecord transactions from the network
+      network.patientData(cardId,returnData.recordId)
+        .then((patient) => {
+          //return error if error in response
+          if (patient.error != null) {
+            res.json({
+              error: patient.error
+            });
+          } else {
+            //else add transaction data to return object
+                returnData.patientId = patient.patientId;
+		        returnData.firstName = patient.firstName;
+		        returnData.lastName = patient.lastName;
+		        returnData.phoneNumber = patient.phoneNumber;
+		        returnData.email = patient.email;
+		        returnData.dob = patient.dob;
+		        returnData.address = patient.address;
+          }
+          res.json(returnData);
+        });
+    });
+});
+
+
+app.post('/api/grantAccessHr', function(req, res) {
+
+  //declare variables to retrieve from request\
+  //console.log(req);
+  var DoctorId= req.body.doctorid;
+  var cardId = req.body.cardid;
+  var healthRecordId =req.body.healthRecordId;
+
+
+  //print variables
+  console.log('patientData using param - ' + ' cardId: ' + cardId + ' healthRecordId: ' + healthRecordId + 'doctorId' +DoctorId);
+
+  //declare return object
+  var returnData = {};
+
+  //get patient data from network
+  network.grantAccessHrTransaction(cardId,healthRecordId,DoctorId)
+    .then((response) => {
+	    //return error if error in response
+	    if (response.error != null) {
+	      res.json({
+	        error: response.error
+	      });
+	    } else {
+	      //else return success
+	      res.json({
+	        success: response
+	      });
+	    }
+	  });
+    //console.log(returnData);
+});
+
+app.post('/api/revokeAccessHr', function(req, res) {
+
+  //declare variables to retrieve from request\
+  //console.log(req);
+  var DoctorId= req.body.doctorid;
+  var cardId = req.body.cardid;
+  var healthRecordId =req.body.healthRecordId;
+
+
+  //print variables
+  console.log('patientData using param - ' + ' cardId: ' + cardId + ' healthRecordId: ' + healthRecordId + 'doctorId' +DoctorId);
+
+  //declare return object
+  var returnData = {};
+
+  //get patient data from network
+  network.revokeAccessHrTransaction(cardId,healthRecordId,DoctorId)
+    .then((response) => {
+	    //return error if error in response
+	    if (response.error != null) {
+	      res.json({
+	        error: response.error
+	      });
+	    } else {
+	      //else return success
+	      res.json({
+	        success: response
+	      });
+	    }
+	  });
+    //console.log(returnData);
+});
+
+/// warnning!!!!
+app.post('/api/updateHealthRecord', function(req, res) {
+
+  //declare variables to retrieve from request\
+  //console.log(req);
+  var temperature= req.body.temperature;
+  var recordId =req.body.recordId;
+  var cardId = req.body.cardid;
+  var bloodPressure =req.body.bloodPressure;
+
+
+  //print variables
+  console.log('patientData using param - ' + ' cardId: ' + cardId + ' temperature: ' + temperature + 'bloodPressure:' +bloodPressure);
+
+  //declare return object
+  var returnData = {};
+
+  //get patient data from network
+  network.updateHealthRecordData(cardId,recordId,temperature,bloodPressure)
+    .then((response) => {
+	    //return error if error in response
+	    if (response.error != null) {
+	      res.json({
+	        error: response.error
+	      });
+	    } else {
+	      //else return success
+	      res.json({
+	        success: response
+	      });
+	    }
+	  });
+    //console.log(returnData);
+});
+
+
+
+//
 
 //declare port
 var port = process.env.PORT || 8000;

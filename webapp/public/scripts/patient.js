@@ -63,62 +63,41 @@ function updateMember() {
           return str;
         });
 
+        //document.getElementById('healthRecord').value = data.healthRecord[0].recordId;
+        $('.healthRecord-id').html(function(){
+          $('input[name="healthRecord-id"]').val(data.healthRecord[0].recordId);
+        });
+
         $('.healthRecord').html(function() {
-          
-          
           var str =  '<b style="color:red;">Identifed: </b> ' + data.healthRecord[0].recordId +'<br>';
           str = str + '<b style="color:red;">Temperature: </b>' + data.healthRecord[0].temperature +' °C<br>';
           str = str + '<b style="color:red;">Blood Pressure: </b>' + data.healthRecord[0].bloodPressure +' mm / Hg <br>';
-          // str = str + '<b>Date Of Birth: </b>' + data.dob +'<br>';
-          // str = str + '<b>Address: </b>' + data.address +'<br>';
-          //str = str + '<h2><b>' + data.points + '</b></h2>';
+          
+          let doctorauthorisedDoctors = data.healthRecord[0].authorisedDoctors;
+          if(doctorauthorisedDoctors.length!=0){
+            str = str + '<b style="color:red;">Authorised Doctors: </b>';
+            for (var i = 0; i < doctorauthorisedDoctors.length; i++) {
+              let datarevoke=doctorauthorisedDoctors[i].split("#")[1];
+              str = str +  ' Doctors: ' + datarevoke ;
+            }
+            str =str + '<br>';
+          }
+
           return str;
         });
 
+        
+        $('.revokeAccess-doctor select').html(function() {
+          var str = '<option value="" disabled="" selected="">select</option>';
+          var doctorauthorisedDoctors = data.healthRecord[0].authorisedDoctors;
+          for (var i = 0; i < doctorauthorisedDoctors.length; i++) {
+            let datarevoke=doctorauthorisedDoctors[i].split("#")[1];
+            str = str + '<option doctor-revoke-id=' + datarevoke + '> ' + datarevoke + '</option>';
+          }
+          return str;
+        });
 
-
-        //update partners dropdown for earn points transaction
-        // $('.earn-partner select').html(function() {
-        //   var str = '<option value="" disabled="" selected="">select</option>';
-        //   var partnersData = data.partnersData;
-        //   for (var i = 0; i < partnersData.length; i++) {
-        //     str = str + '<option partner-id=' + partnersData[i].id + '> ' + partnersData[i].name + '</option>';
-        //   }
-        //   return str;
-        // });
-
-        //update partners dropdown for use points transaction
-        // $('.use-partner select').html(function() {
-        //   var str = '<option value="" disabled="" selected="">select</option>';
-        //   var partnersData = data.partnersData;
-        //   for (var i = 0; i < partnersData.length; i++) {
-        //     str = str + '<option partner-id=' + partnersData[i].id + '> ' + partnersData[i].name + '</option>';
-        //   }
-        //   return str;
-        // });
-
-        //update earn points transaction
-        // $('.points-allocated-transactions').html(function() {
-        //   var str = '';
-        //   var transactionData = data.earnPointsResult;
-
-        //   for (var i = 0; i < transactionData.length; i++) {
-        //     str = str + '<p>timeStamp: ' + transactionData[i].timestamp + '<br />partner: ' + transactionData[i].partner + '<br />member: ' + transactionData[i].member + '<br />points: ' + transactionData[i].points + '<br />transactionName: ' + transactionData[i].$class + '<br />transactionID: ' + transactionData[i].transactionId + '</p><br>';
-        //   }
-        //   return str;
-        // });
-
-        // //update use points transaction
-        // $('.points-redeemed-transactions').html(function() {
-        //   var str = '';
-
-        //   var transactionData = data.usePointsResults;
-
-        //   for (var i = 0; i < transactionData.length; i++) {
-        //     str = str + '<p>timeStamp: ' + transactionData[i].timestamp + '<br />partner: ' + transactionData[i].partner + '<br />member: ' + transactionData[i].member + '<br />points: ' + transactionData[i].points + '<br />transactionName: ' + transactionData[i].$class + '<br />transactionID: ' + transactionData[i].transactionId + '</p><br>';
-        //   }
-        //   return str;
-        // });
+        getAllDoctorAccess(formCardId);
 
         //remove login section and display member page
         document.getElementById('loginSection').style.display = "none";
@@ -140,34 +119,27 @@ function updateMember() {
 }
 
 
+$('.submit-grant-doctor').click(function(){
+  GrantAccessHr();
+});
 
-function usePoints(formPoints) {
 
-  //get user input data
-  var formAccountNum = $('.account-number input').val();
+function GrantAccessHr(){
+  // var formAccountNum = $('.patient-id input').val();
   var formCardId = $('.card-id input').val();
-  var formPartnerId = $('.use-partner select').find(":selected").attr('partner-id');
-
-  //create json data
-  var inputData = '{' + '"accountnumber" : "' + formAccountNum + '", ' + '"cardid" : "' + formCardId + '", ' + '"points" : "' + formPoints + '", ' + '"partnerid" : "' + formPartnerId + '"}';
-  console.log(inputData)
-
-  //make ajax call
+  var formHealthRecordId = $('.healthRecord-id input').val();
+  var formDoctorId = $('.grantAccess-doctor select').find(":selected").attr('doctor-grant-id');
+  var inputData = '{' +'"healthRecordId" : "' + formHealthRecordId + '", '+ '"cardid" : "' + formCardId + '", ' +  '"doctorid" : "' + formDoctorId + '"}';
+  console.log(inputData);
   $.ajax({
     type: 'POST',
-    url: apiUrl + 'usePoints',
+    url: apiUrl + 'grantAccessHr',
     data: inputData,
     dataType: 'json',
     contentType: 'application/json',
     beforeSend: function() {
-      //display loading
-      document.getElementById('loader').style.display = "block";
-      document.getElementById('infoSection').style.display = "none";
     },
     success: function(data) {
-
-      document.getElementById('loader').style.display = "none";
-      document.getElementById('infoSection').style.display = "block";
 
       //check data for error
       if (data.error) {
@@ -176,6 +148,7 @@ function usePoints(formPoints) {
       } else {
         //update member page and notify successful transaction
         updateMember();
+        console.log('Transaction successful');
         alert('Transaction successful');
       }
 
@@ -187,6 +160,144 @@ function usePoints(formPoints) {
       console.log(jqXHR);
     },
     complete: function() {}
-  });
+  }); 
 
 }
+
+$('.submit-revoke-doctor').click(function(){
+  RevokeAccessHr();
+});
+
+function RevokeAccessHr(){
+  // var formAccountNum = $('.patient-id input').val();
+  var formCardId = $('.card-id input').val();
+  var formHealthRecordId = $('.healthRecord-id input').val();
+  var formDoctorId = $('.revokeAccess-doctor select').find(":selected").attr('doctor-revoke-id');
+  var inputData = '{' +'"healthRecordId" : "' + formHealthRecordId + '", '+ '"cardid" : "' + formCardId + '", ' +  '"doctorid" : "' + formDoctorId + '"}';
+  console.log(inputData);
+  $.ajax({
+    type: 'POST',
+    url: apiUrl + 'revokeAccessHr',
+    data: inputData,
+    dataType: 'json',
+    contentType: 'application/json',
+    beforeSend: function() {
+    },
+    success: function(data) {
+
+      //check data for error
+      if (data.error) {
+        alert(data.error);
+        return;
+      } else {
+        //update member page and notify successful transaction
+        updateMember();
+        console.log('Transaction successful');
+        alert('Transaction successful');
+      }
+
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      alert("Error: Try again")
+      console.log(errorThrown);
+      console.log(textStatus);
+      console.log(jqXHR);
+    },
+    complete: function() {}
+  }); 
+
+}
+
+
+function getAllDoctorAccess(cardid){
+  var inputData= '{' + '"cardid" : "' + cardid +'"}';
+  console.log(inputData);
+  $.ajax({
+    type: 'POST',
+    url: apiUrl + 'getAllDoctor',
+    data: inputData,
+    dataType: 'json',
+    contentType: 'application/json',
+    beforeSend: function() {
+    },
+    success: function(data) {
+
+      //check data for error
+      if (data.error) {
+        alert(data.error);
+        return;
+      } else {
+
+        //console.log(data.doctor[0].doctorId);
+        //update all doctor dropdown for transaction
+        $('.grantAccess-doctor select').html(function() {
+          var str = '<option value="" disabled="" selected="">select</option>';
+          var doctorData = data.doctor;
+          for (var i = 0; i < doctorData.length; i++) {
+            str = str + '<option doctor-grant-id=' + doctorData[i].doctorId + '> ' + doctorData[i].doctorId + '</option>';
+          }
+          return str;
+        });
+        //update member page and notify successful transaction
+        //updateMember();
+        // alert('Transaction successful');
+      }
+
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      alert("Error: Try again")
+      console.log(errorThrown);
+      console.log(textStatus);
+      console.log(jqXHR);
+    },
+    complete: function() {}
+  });
+}
+
+$('.submit-update-healthRecord').click(function(){
+  updateHealthRecord();
+});
+
+function updateHealthRecord(){
+  var formCardId = $('.card-id input').val();
+  var formHealthRecordId = $('.healthRecord-id input').val();
+  var formTemp = $('#update-temperature').val();
+  var formBP = $("#update-bloodPressure").val();//$('#update-bloodPressure').find('input[name="update-bloodPressure"]').val();
+  var inputData ='{' +'"recordId" : "' + formHealthRecordId + '", '+'"temperature" : "' + formTemp + '", '+ '"cardid" : "' + formCardId + '", ' +  '"bloodPressure" : "' + formBP + '"}';
+  console.log(inputData);
+
+  $.ajax({
+    type: 'POST',
+    url: apiUrl + 'updateHealthRecord',
+    data: inputData,
+    dataType: 'json',
+    contentType: 'application/json',
+    beforeSend: function() {
+    },
+    success: function(data) {
+
+      //check data for error
+      if (data.error) {
+        alert(data.error);
+        return;
+      } else {
+        //update member page and notify successful transaction
+        updateMember();
+        //console.log('Transaction successful');
+        $('#myModalclose').trigger('click');
+        alert('Transaction successful');
+      }
+
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      alert("Error: Try again")
+      console.log(errorThrown);
+      console.log(textStatus);
+      console.log(jqXHR);
+    },
+    complete: function() {}
+  }); 
+
+}
+
+
